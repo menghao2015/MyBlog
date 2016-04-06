@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Flask - Login {% endblock %}
+
+{% block page_content %}
+
+<h1>Login</h1>
+<div class="col-md-4">
+	{{ wtf.quick_form(form) }}
+	<p> No account ? click here <a href="{{ url_for('auth.register') }}">Register</a></p>
+	<p> Forgot password? click here <a href="{{ url_for('auth.reset_passwd_request') }}">Reset Passwd</a></p>
+</div>
+
+
+
+{% endblock %}
