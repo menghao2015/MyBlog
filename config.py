@@ -11,6 +11,11 @@ class Config:
 	FLASKY_POSTS_PER_PAGE = 10
 	FLASKY_COMMENTS_PER_PAGE = 10
 	SSL_DISABLE = True
+	MAIL_SERVER = 'smtp.163.com'
+	MAIL_PORT = 25
+	MAIL_USE_TLS = True
+	MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+	MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 
 	@staticmethod
 	def init_app(apl):
@@ -18,22 +23,41 @@ class Config:
 
 class DevelopmentConfig(Config):
 	DEBUG = True
-	MAIL_SERVER = 'smtp.163.com'
-	MAIL_PORT = 25
-	MAIL_USE_TLS = True
-	MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-	MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 	SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
-				'mysql://root:redhat@192.168.0.30/data'
+				'mysql://root:redhat@192.168.0.30/data_dev'
 
 class TestingConfig(Config):
 	TESTING = True
 	SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
-				'mysql://root:redhat@127.0.0.1/data_test'
+				'mysql://root:redhat@192.168.0.30/data_test'
 
 class ProductionConfig(Config):
 	SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-				'mysql://root:redhat@127.0.0.1/data'
+				'mysql://root:redhat@192.168.0.30/data_dev'
+	
+	@classmethod
+	def init_app(cls, apl):
+		Config.init_app(apl)
+		
+		# email errors to the administrators
+		import logging
+		from logging.handlers import SMTPHandler
+		credentials = None
+		secure = None
+		if getattr(cls, 'MAIL_USERNAME', None) is not None:
+			credentials = (cls.MAIL_USERNAME, cls.MAIL_PASSWORD)
+		if getattr(cls, 'MAIL_USE_TLS', None):
+			secure = ()
+		mail_handler = SMTPHandler(
+			mailhost=(cls.MAIL_SERVER, cls.MAIL_PORT),
+			fromaddr=cls.FLASKY_MAIL_SENDER,
+			toaddrs=[cls.FLASKY_ADMIN],
+			subject=cls.FLASKY_MAIL_SUBJECT_PREFIX + ' Application Error',
+			credentials=credentials,
+			secure=secure)
+		mail_handler.setLevel(logging.ERROR)
+		apl.logger.addHandler(mail_handler)
+
 
 class HerokuConfig(ProductionConfig):
 	@classmethod
@@ -41,9 +65,9 @@ class HerokuConfig(ProductionConfig):
 		ProductionConfig.init_app(apl)
 
 		import logging
-		from logging import StreamHander
+		from logging import StreamHandler
 		file_handler = StreamHandler()
-		file_handler.setLevel(loggin.WARNING)
+		file_handler.setLevel(logging.WARNING)
 		apl.logger.addHandler(file_handler)
 		SSL_DISABLE = bool(os.environ.get('SSL_DISABLE'))
 
