@@ -24,7 +24,7 @@ class DevelopmentConfig(Config):
 	MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
 	MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 	SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
-				'mysql://root:redhat@127.0.0.1/data'
+				'mysql://root:redhat@192.168.0.30/data'
 
 class TestingConfig(Config):
 	TESTING = True
@@ -40,7 +40,7 @@ class HerokuConfig(ProductionConfig):
 	def init_app(cls, apl):
 		ProductionConfig.init_app(apl)
 
-		import loggin
+		import logging
 		from logging import StreamHander
 		file_handler = StreamHandler()
 		file_handler.setLevel(loggin.WARNING)
