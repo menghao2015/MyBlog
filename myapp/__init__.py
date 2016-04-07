@@ -24,6 +24,11 @@ def create_app(config_name):
 	apl.config.from_object(config[config_name])
 	config[config_name].init_app(apl)
 	
+	if not apl.debug and not apl.testing and not apl.config['SSL_DISABLE']:
+		from flask.ext.sslify import SSLify
+		sslify = SSLify(apl)
+		
+
 	bootstrap.init_app(apl)
 	mail.init_app(apl)
 	moment.init_app(apl)

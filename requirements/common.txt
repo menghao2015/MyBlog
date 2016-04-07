@@ -18,3 +18,4 @@ itsdangerous
 flask-pagedown
 markdown
 bleach
+guniconrn==18.0
