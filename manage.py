@@ -21,8 +21,8 @@ def deploy():
 	from flask.ext.migrate import upgrade
 	from myapp.models import Role, User
 
-#	upgrade()
-#	Role.insert_roles()
+	upgrade()
+	Role.insert_roles()
 
 
 if __name__ == '__main__':
